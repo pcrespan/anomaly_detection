@@ -1,0 +1,27 @@
+import os
+import joblib
+
+MODEL_DIR = "../models"
+
+def get_latest_version(series_id: str) -> int:
+    existing = [f for f in os.listdir(MODEL_DIR) if f.startswith(series_id)]
+    versions = [int(f.split("_v")[1].split(".pkl")[0]) for f in existing if "_v" in f]
+    return max(versions, default=0)
+
+def save_model(model, series_id: str):
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    version = get_latest_version(series_id) + 1
+    filename = f"{series_id}_v{version}.pkl"
+    filepath = os.path.join(MODEL_DIR, filename)
+    joblib.dump(model, filepath)
+    return version
+
+
+def load_model(series_id: str):
+    version = get_latest_version(series_id)
+    if version is None:
+        raise FileNotFoundError(f"No model found for series_id={series_id}")
+    
+    path = os.path.join(MODEL_DIR, f"{series_id}_v{version}.pkl")
+    model = joblib.load(path)
+    return model, version

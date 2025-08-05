@@ -54,3 +54,7 @@ def predict_point(series_id: str, point: DataPoint):
         "version": f"v{version}",
         "is_anomaly": is_anomaly
     }
+
+@app.get("/healthcheck")
+def healthcheck():
+    return get_metrics()

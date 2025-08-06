@@ -33,3 +33,7 @@ def fit_model(series_id: str, series: TimeSeries):
         "version": f"v{version}",
         "points_used": len(values)
     }
+
+@app.get("/healthcheck")
+def healthcheck():
+    return get_metrics()

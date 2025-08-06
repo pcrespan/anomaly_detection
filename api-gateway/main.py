@@ -27,3 +27,35 @@ async def predict(series_id: str, point: DataPoint):
             return response.json()
         except httpx.HTTPStatusError as e:
             raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+
+@app.get("/oldhealthcheck")
+async def _gateway_healthcheck():
+    async with httpx.AsyncClient() as client:
+        try:
+            predictor = await client.get(f"{PREDICTOR_URL}/healthcheck")
+            trainer = await client.get(f"{TRAINER_URL}/healthcheck")
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=503, detail=f"Service unavailable: {e}")
+    
+    return {
+        "predictor": predictor.json(),
+        "trainer": trainer.json()
+    }
+
+@app.get("/healthcheck")
+async def gateway_healthcheck():
+    async with httpx.AsyncClient() as client:
+        try:
+            predictor = await client.get(f"{PREDICTOR_URL}/healthcheck")
+            trainer = await client.get(f"{TRAINER_URL}/healthcheck")
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=503, detail=f"Service unavailable: {e}")
+    
+    predictor_data = predictor.json()
+    trainer_data = trainer.json()
+
+    return {
+        "series_trained": predictor_data.get("series_trained", 0),
+        "inference_latency_ms": predictor_data.get("inference_latency_ms", {"avg": 0, "p95": 0}),
+        "training_latency_ms": trainer_data.get("training_latency_ms", {"avg": 0, "p95": 0})
+    }

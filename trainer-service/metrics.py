@@ -1,36 +1,41 @@
-import time
-import threading
+import redis
 import statistics
-from collections import defaultdict
+import json
+from typing import List
 
-lock = threading.Lock()
+r = redis.Redis(host="redis", port=6379, decode_responses=True)
 
-training_times = []
-inference_times = []
-trained_series = set()
+# Chaves no Redis
+KEY_TRAINING_TIMES = "metrics:training_times"
+KEY_INFERENCE_TIMES = "metrics:inference_times"
+KEY_SERIES_TRAINED = "metrics:series_trained"
+
+MAX_ENTRIES = 1000  # limita o tamanho da lista para evitar memória infinita
 
 def record_training_latency(ms: float):
-    with lock:
-        training_times.append(ms)
+    r.lpush(KEY_TRAINING_TIMES, ms)
+    r.ltrim(KEY_TRAINING_TIMES, 0, MAX_ENTRIES - 1)
 
 def record_inference_latency(ms: float):
-    with lock:
-        inference_times.append(ms)
+    r.lpush(KEY_INFERENCE_TIMES, ms)
+    r.ltrim(KEY_INFERENCE_TIMES, 0, MAX_ENTRIES - 1)
 
 def register_series(series_id: str):
-    with lock:
-        trained_series.add(series_id)
+    r.sadd(KEY_SERIES_TRAINED, series_id)
+
+def _get_latency_metrics(key: str) -> dict:
+    raw_values = r.lrange(key, 0, -1)
+    values: List[float] = [float(v) for v in raw_values]
+    
+    if not values:
+        return {"avg": 0, "p95": 0}
+    
+    avg = round(statistics.mean(values), 2)
+    p95 = round(statistics.quantiles(values, n=100)[94], 2) if len(values) >= 20 else 0
+    return {"avg": avg, "p95": p95}
 
 def get_metrics():
-    with lock:
-        return {
-            "series_trained": len(trained_series),
-            "inference_latency_ms": {
-                "avg": round(statistics.mean(inference_times), 2) if inference_times else 0,
-                "p95": round(statistics.quantiles(inference_times, n=100)[94], 2) if len(inference_times) >= 20 else 0
-            },
-            "training_latency_ms": {
-                "avg": round(statistics.mean(training_times), 2) if training_times else 0,
-                "p95": round(statistics.quantiles(training_times, n=100)[94], 2) if len(training_times) >= 20 else 0
-            }
-        }
+    return {
+        "series_trained": r.scard(KEY_SERIES_TRAINED),
+        "training_latency_ms": _get_latency_metrics(KEY_TRAINING_TIMES),
+    }

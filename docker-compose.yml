@@ -1,0 +1,35 @@
+services:
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - trainer-service
+      - predictor-service
+    networks:
+      - ml-net
+
+  trainer-service:
+    build: ./trainer-service
+    container_name: trainer-service
+    ports:
+      - "9001:9000"
+    volumes:
+      - ./models:/app/models
+    networks:
+      - ml-net
+
+  predictor-service:
+    build: ./predictor-service
+    container_name: predictor-service
+    ports:
+      - "9002:9000"
+    volumes:
+      - ./models:/app/models
+    networks:
+      - ml-net
+
+networks:
+  ml-net:
+    driver: bridge

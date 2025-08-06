@@ -2,7 +2,9 @@ import os
 import joblib
 from functools import lru_cache
 
-MODEL_DIR = "../models"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+#MODEL_DIR = "./models"
 
 def get_latest_version(series_id: str) -> int:
     existing = [f for f in os.listdir(MODEL_DIR) if f.startswith(series_id)]
@@ -15,6 +17,7 @@ def save_model(model, series_id: str):
     filename = f"{series_id}_v{version}.pkl"
     filepath = os.path.join(MODEL_DIR, filename)
     joblib.dump(model, filepath)
+    print(f"Model saved on {filepath}")
     return version
 
 def load_model(series_id: str):
@@ -23,6 +26,7 @@ def load_model(series_id: str):
         raise FileNotFoundError(f"No model found for series_id={series_id}")
     
     path = os.path.join(MODEL_DIR, f"{series_id}_v{version}.pkl")
+    print(f"Attempting to load model: {path}")
     model = joblib.load(path)
     return model, version
 

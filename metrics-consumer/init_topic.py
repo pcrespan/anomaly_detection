@@ -2,7 +2,7 @@ from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import TopicAlreadyExistsError
 
 admin = KafkaAdminClient(
-    bootstrap_servers="kafka:9092",
+    bootstrap_servers=["kafka-1:9092", "kafka-2:9092", "kafka-3:9092"],
     client_id="metrics-topic-creator"
 )
 

@@ -7,9 +7,16 @@ from metrics import (
     get_metrics
 )
 import time
+import json
+from kafka import KafkaProducer
 from functools import lru_cache
 
 app = FastAPI()
+
+producer = KafkaProducer(
+    bootstrap_servers="kafka:9092",
+    value_serializer=lambda v: json.dumps(v).encode("utf-8")
+)
 
 @app.post("/predict/{series_id}")
 def predict_point(series_id: str, point: DataPoint):
@@ -23,7 +30,12 @@ def predict_point(series_id: str, point: DataPoint):
     is_anomaly = bool(model.predict(point))
     elapsed = (time.perf_counter() - start) * 1000
 
-    record_inference_latency(elapsed)
+    #record_inference_latency(elapsed)
+
+    producer.send("metrics", {
+        "type": "inference",
+        "latency_ms": elapsed
+    })
 
     return {
         "series_id": series_id,

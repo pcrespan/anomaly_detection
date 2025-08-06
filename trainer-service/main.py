@@ -8,9 +8,16 @@ from metrics import (
     register_series,
     get_metrics
 )
+from kafka import KafkaProducer
+import json
 import time
 
 app = FastAPI()
+
+producer = KafkaProducer(
+    bootstrap_servers="kafka:9092",
+    value_serializer=lambda v: json.dumps(v).encode("utf-8")
+)
 
 @app.post("/fit/{series_id}")
 def fit_model(series_id: str, series: TimeSeries):
@@ -24,9 +31,15 @@ def fit_model(series_id: str, series: TimeSeries):
     model.fit(series.data)
     version = save_model(model, series_id)
     elapsed = (time.perf_counter() - start) * 1000  # ms
+    
+    producer.send("metrics", {
+        "type": "training",
+        "series_id": series_id,
+        "latency_ms": elapsed
+    })
 
-    record_training_latency(elapsed)
-    register_series(series_id)
+    #record_training_latency(elapsed)
+    #register_series(series_id)
 
     return {
         "series_id": series_id,

@@ -1,5 +1,6 @@
 fastapi[standard]
 redis
+kafka-python
 uvicorn
 joblib
 pydantic

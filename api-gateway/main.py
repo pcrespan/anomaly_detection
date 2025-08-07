@@ -1,6 +1,9 @@
+import sys
+sys.path.append('/app')
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from timeseries import TimeSeries, DataPoint
+from common.timeseries import TimeSeries, DataPoint
 import httpx
 import os
 from dotenv import load_dotenv

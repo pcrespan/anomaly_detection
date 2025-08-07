@@ -5,12 +5,12 @@ from typing import List
 
 r = redis.Redis(host="redis", port=6379, decode_responses=True)
 
-# Chaves no Redis
+# Redis
 KEY_TRAINING_TIMES = "metrics:training_times"
 KEY_INFERENCE_TIMES = "metrics:inference_times"
 KEY_SERIES_TRAINED = "metrics:series_trained"
 
-MAX_ENTRIES = 1000  # limita o tamanho da lista para evitar memória infinita
+MAX_ENTRIES = 1000  # Max size
 
 def record_training_latency(ms: float):
     r.lpush(KEY_TRAINING_TIMES, ms)
@@ -34,8 +34,14 @@ def _get_latency_metrics(key: str) -> dict:
     p95 = round(statistics.quantiles(values, n=100)[94], 2) if len(values) >= 20 else 0
     return {"avg": avg, "p95": p95}
 
-def get_metrics():
+def get_training_metrics():
     return {
         "series_trained": r.scard(KEY_SERIES_TRAINED),
-        "inference_latency_ms": _get_latency_metrics(KEY_INFERENCE_TIMES),
+        "training_latency_ms": _get_latency_metrics(KEY_TRAINING_TIMES)
+    }
+
+def get_inference_metrics():
+    return {
+        "series_trained": r.scard(KEY_SERIES_TRAINED),
+        "inference_latency_ms": _get_latency_metrics(KEY_INFERENCE_TIMES)
     }

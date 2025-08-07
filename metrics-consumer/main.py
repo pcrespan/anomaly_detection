@@ -1,8 +1,11 @@
-from kafka import KafkaConsumer
+import sys
+sys.path.append("/app")
+
 import json
 import os
+from kafka import KafkaConsumer
 from dotenv import load_dotenv
-from metrics import record_training_latency, register_series, record_inference_latency
+from common.metrics import record_training_latency, register_series, record_inference_latency
 
 load_dotenv()
 

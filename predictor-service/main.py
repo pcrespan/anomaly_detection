@@ -1,10 +1,13 @@
+import sys
+sys.path.append('/app')
+
 from fastapi import FastAPI, HTTPException
-from model import AnomalyDetectionModel
-from persistence import load_model, cached_load_model
-from timeseries import TimeSeries, DataPoint
-from metrics import (
+from common.model import AnomalyDetectionModel
+from common.persistence import cached_load_model
+from common.timeseries import TimeSeries, DataPoint
+from common.metrics import (
     record_inference_latency,
-    get_metrics
+    get_inference_metrics
 )
 import time
 import json
@@ -46,4 +49,4 @@ def predict_point(series_id: str, point: DataPoint):
 
 @app.get("/healthcheck")
 def healthcheck():
-    return get_metrics()
+    return get_inference_metrics()

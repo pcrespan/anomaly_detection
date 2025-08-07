@@ -4,7 +4,6 @@ from functools import lru_cache
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "models")
-#MODEL_DIR = "./models"
 
 def get_latest_version(series_id: str) -> int:
     existing = [f for f in os.listdir(MODEL_DIR) if f.startswith(series_id)]
@@ -21,6 +20,14 @@ def load_model(series_id: str):
     print(f"Attempting to load model: {path}")
     model = joblib.load(path)
     return model, version
+
+def save_model(model, series_id: str):
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    version = get_latest_version(series_id) + 1
+    filename = f"{series_id}_v{version}.pkl"
+    filepath = os.path.join(MODEL_DIR, filename)
+    joblib.dump(model, filepath)
+    return version
 
 #@lru_cache(maxsize=100)
 def cached_load_model(series_id: str):

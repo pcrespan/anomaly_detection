@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from timeseries import TimeSeries, DataPoint
+from common.timeseries import TimeSeries, DataPoint
 import numpy as np
 
 class AnomalyDetectionModel:

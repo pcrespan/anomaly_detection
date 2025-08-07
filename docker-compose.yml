@@ -6,9 +6,13 @@ services:
       - "8000:8000"
     env_file:
     - .env
+    environment:
+      - PYTHONPATH=/app
     depends_on:
       - trainer-service
       - predictor-service
+    volumes:
+      - ./common:/app/common
     networks:
       - ml-net
     restart: on-failure
@@ -20,8 +24,11 @@ services:
       - "9001:9000"
     env_file:
     - .env
+    environment:
+      - PYTHONPATH=/app
     volumes:
       - ./models:/app/models
+      - ./common:/app/common
     networks:
       - ml-net
     restart: on-failure
@@ -36,8 +43,11 @@ services:
       - "9002:9000"
     env_file:
     - .env
+    environment:
+      - PYTHONPATH=/app
     volumes:
       - ./models:/app/models
+      - ./common:/app/common
     networks:
       - ml-net
     restart: on-failure
@@ -59,9 +69,13 @@ services:
     container_name: metrics-consumer
     env_file:
     - .env
+    environment:
+      - PYTHONPATH=/app
     depends_on:
       - kafka-1
       - redis
+    volumes:
+      - ./common:/app/common
     networks:
       - ml-net
     restart: on-failure

@@ -1,12 +1,15 @@
+import sys
+sys.path.append('/app')
+
 from fastapi import FastAPI, HTTPException
-from model import AnomalyDetectionModel
-from persistence import save_model, load_model
-from timeseries import TimeSeries, DataPoint
-from metrics import (
+from common.model import AnomalyDetectionModel
+from common.persistence import save_model, load_model
+from common.timeseries import TimeSeries, DataPoint
+from common.metrics import (
     record_training_latency,
     record_inference_latency,
     register_series,
-    get_metrics
+    get_training_metrics
 )
 from kafka import KafkaProducer
 from dotenv import load_dotenv
@@ -49,4 +52,4 @@ def fit_model(series_id: str, series: TimeSeries):
 
 @app.get("/healthcheck")
 def healthcheck():
-    return get_metrics()
+    return get_training_metrics()

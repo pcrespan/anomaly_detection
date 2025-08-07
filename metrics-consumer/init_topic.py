@@ -1,8 +1,12 @@
+import os
 from kafka.admin import KafkaAdminClient, NewTopic
 from kafka.errors import TopicAlreadyExistsError
+from dotenv import load_dotenv
+
+load_dotenv()
 
 admin = KafkaAdminClient(
-    bootstrap_servers=["kafka-1:9092", "kafka-2:9092", "kafka-3:9092"],
+    bootstrap_servers=os.getenv("KAFKA_BROKERS", "kafka-1:9092").split(","),
     client_id="metrics-topic-creator"
 )
 

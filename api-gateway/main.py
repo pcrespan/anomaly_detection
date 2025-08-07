@@ -22,7 +22,12 @@ async def fit(series_id: str, series: TimeSeries):
             response.raise_for_status()
             return response.json()
         except httpx.HTTPStatusError as e:
-            raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+            try:
+                error_data = e.response.json()
+                error_detail = error_data.get("detail", "Unknown error")
+            except Exception:
+                error_detail = e.response.text
+            raise HTTPException(status_code=e.response.status_code, detail=error_detail)
 
 @app.post("/predict/{series_id}")
 async def predict(series_id: str, point: DataPoint):
@@ -32,21 +37,12 @@ async def predict(series_id: str, point: DataPoint):
             response.raise_for_status()
             return response.json()
         except httpx.HTTPStatusError as e:
-            raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
-
-@app.get("/oldhealthcheck")
-async def _gateway_healthcheck():
-    async with httpx.AsyncClient() as client:
-        try:
-            predictor = await client.get(f"{PREDICTOR_URL}/healthcheck")
-            trainer = await client.get(f"{TRAINER_URL}/healthcheck")
-        except httpx.RequestError as e:
-            raise HTTPException(status_code=503, detail=f"Service unavailable: {e}")
-    
-    return {
-        "predictor": predictor.json(),
-        "trainer": trainer.json()
-    }
+            try:
+                error_data = e.response.json()
+                error_detail = error_data.get("detail", "Unknown error")
+            except Exception:
+                error_detail = e.response.text
+            raise HTTPException(status_code=e.response.status_code, detail=error_detail)
 
 @app.get("/healthcheck")
 async def gateway_healthcheck():

@@ -4,7 +4,6 @@ from functools import lru_cache
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "models")
-#MODEL_DIR = "./models"
 
 def get_latest_version(series_id: str) -> int:
     existing = [f for f in os.listdir(MODEL_DIR) if f.startswith(series_id)]

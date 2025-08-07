@@ -9,13 +9,16 @@ from metrics import (
     get_metrics
 )
 from kafka import KafkaProducer
+from dotenv import load_dotenv
 import json
 import time
+import os
 
 app = FastAPI()
+load_dotenv()
 
 producer = KafkaProducer(
-    bootstrap_servers=["kafka-1:9092", "kafka-2:9092", "kafka-3:9092"],
+    bootstrap_servers=os.getenv("KAFKA_BROKERS", "kafka-1:9092").split(","),
     value_serializer=lambda v: json.dumps(v).encode("utf-8")
 )
 
@@ -30,16 +33,13 @@ def fit_model(series_id: str, series: TimeSeries):
     model = AnomalyDetectionModel()
     model.fit(series.data)
     version = save_model(model, series_id)
-    elapsed = (time.perf_counter() - start) * 1000  # ms
+    elapsed = (time.perf_counter() - start) * 1000
     
     producer.send("metrics", {
         "type": "training",
         "series_id": series_id,
         "latency_ms": elapsed
     })
-
-    #record_training_latency(elapsed)
-    #register_series(series_id)
 
     return {
         "series_id": series_id,

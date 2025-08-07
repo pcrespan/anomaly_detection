@@ -1,10 +1,14 @@
 from kafka import KafkaConsumer
 import json
+import os
+from dotenv import load_dotenv
 from metrics import record_training_latency, register_series, record_inference_latency
+
+load_dotenv()
 
 consumer = KafkaConsumer(
     "metrics",
-    bootstrap_servers=["kafka-1:9092", "kafka-2:9092", "kafka-3:9092"],
+    bootstrap_servers=os.getenv("KAFKA_BROKERS", "kafka-1:9092").split(","),
     group_id="metrics-consumer",
     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
     auto_offset_reset="earliest"

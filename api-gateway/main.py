@@ -2,11 +2,14 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from timeseries import TimeSeries, DataPoint
 import httpx
+import os
+from dotenv import load_dotenv
 
 app = FastAPI()
+load_dotenv()
 
-TRAINER_URL = "http://trainer-service:9000"
-PREDICTOR_URL = "http://predictor-service:9000"
+TRAINER_URL = os.getenv("TRAINER_URL", "http://trainer-service:9000")
+PREDICTOR_URL = os.getenv("PREDICTOR_URL", "http://predictor-service:9000")
 
 @app.post("/fit/{series_id}")
 async def fit(series_id: str, series: TimeSeries):

@@ -4,6 +4,8 @@ services:
     container_name: api-gateway
     ports:
       - "8000:8000"
+    env_file:
+    - .env
     depends_on:
       - trainer-service
       - predictor-service
@@ -16,6 +18,8 @@ services:
     container_name: trainer-service
     ports:
       - "9001:9000"
+    env_file:
+    - .env
     volumes:
       - ./models:/app/models
     networks:
@@ -30,6 +34,8 @@ services:
     container_name: predictor-service
     ports:
       - "9002:9000"
+    env_file:
+    - .env
     volumes:
       - ./models:/app/models
     networks:
@@ -51,6 +57,8 @@ services:
   metrics-consumer:
     build: ./metrics-consumer
     container_name: metrics-consumer
+    env_file:
+    - .env
     depends_on:
       - kafka-1
       - redis

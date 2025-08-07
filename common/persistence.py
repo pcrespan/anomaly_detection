@@ -1,6 +1,5 @@
 import os
 import joblib
-from functools import lru_cache
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "models")
@@ -29,6 +28,5 @@ def save_model(model, series_id: str):
     joblib.dump(model, filepath)
     return version
 
-#@lru_cache(maxsize=100)
 def cached_load_model(series_id: str):
     return load_model(series_id)

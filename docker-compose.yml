@@ -92,6 +92,38 @@ services:
       - ml-net
     restart: on-failure
   
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: training_data
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ml-net
+
+  training-data-consumer:
+    build: ./training-data-consumer
+    container_name: training-data-consumer
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - kafka-1
+      - postgres
+    volumes:
+      - ./common:/app/common
+    networks:
+      - ml-net
+    restart: on-failure
+  
   kafka-1:
     image: bitnami/kafka:latest
     container_name: kafka-1
@@ -142,3 +174,6 @@ services:
 networks:
   ml-net:
     driver: bridge
+
+volumes:
+  postgres_data:

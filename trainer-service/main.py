@@ -45,6 +45,12 @@ def fit_model(series_id: str, series: TimeSeries):
         "latency_ms": elapsed
     })
 
+    producer.send("training-data", {
+        "series_id": series_id,
+        "version": f"v{version}",
+        "data": [point.dict() for point in series.data]
+    })
+
     return {
         "series_id": series_id,
         "version": f"v{version}",

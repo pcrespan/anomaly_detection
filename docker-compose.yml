@@ -27,7 +27,6 @@ services:
     environment:
       - PYTHONPATH=/app
     volumes:
-      - ./models:/app/models
       - ./common:/app/common
     networks:
       - ml-net
@@ -46,7 +45,6 @@ services:
     environment:
       - PYTHONPATH=/app
     volumes:
-      - ./models:/app/models
       - ./common:/app/common
     networks:
       - ml-net
@@ -64,9 +62,23 @@ services:
       - ml-net
     restart: on-failure
   
-  metrics-consumer:
+  metrics-consumer-1:
     build: ./metrics-consumer
-    container_name: metrics-consumer
+    env_file:
+    - .env
+    environment:
+      - PYTHONPATH=/app
+    depends_on:
+      - kafka-1
+      - redis
+    volumes:
+      - ./common:/app/common
+    networks:
+      - ml-net
+    restart: on-failure
+
+  metrics-consumer-2:
+    build: ./metrics-consumer
     env_file:
     - .env
     environment:

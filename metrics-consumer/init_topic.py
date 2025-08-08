@@ -14,7 +14,7 @@ try:
     topic_name = "metrics"
     topic = NewTopic(
         name=topic_name,
-        num_partitions=5,
+        num_partitions=2,
         replication_factor=1
     )
     admin.create_topics([topic])

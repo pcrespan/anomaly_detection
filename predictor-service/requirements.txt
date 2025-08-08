@@ -1,6 +1,7 @@
 fastapi[standard]
 redis
 kafka-python
+psutil
 python-dotenv
 uvicorn
 joblib

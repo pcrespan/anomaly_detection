@@ -59,5 +59,9 @@ async def gateway_healthcheck():
     return {
         "series_trained": predictor_data.get("series_trained", 0),
         "inference_latency_ms": predictor_data.get("inference_latency_ms", {"avg": 0, "p95": 0}),
-        "training_latency_ms": trainer_data.get("training_latency_ms", {"avg": 0, "p95": 0})
+        "training_latency_ms": trainer_data.get("training_latency_ms", {"avg": 0, "p95": 0}),
+        "system_metrics": {
+            "trainer": trainer_data.get("system", {}),
+            "predictor": predictor_data.get("system", {})
+        }
     }

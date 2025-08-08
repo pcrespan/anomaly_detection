@@ -11,6 +11,7 @@ from common.metrics import (
     register_series,
     get_training_metrics
 )
+from common.system_metrics import get_system_metrics
 from kafka import KafkaProducer
 from dotenv import load_dotenv
 import json
@@ -52,4 +53,9 @@ def fit_model(series_id: str, series: TimeSeries):
 
 @app.get("/healthcheck")
 def healthcheck():
-    return get_training_metrics()
+    metrics = get_training_metrics()
+    system_metrics = get_system_metrics()
+    return {
+        **metrics,
+        "system": system_metrics
+    }

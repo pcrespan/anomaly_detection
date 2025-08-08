@@ -9,6 +9,7 @@ from common.metrics import (
     record_inference_latency,
     get_inference_metrics
 )
+from common.system_metrics import get_system_metrics
 import time
 import json
 import os
@@ -49,4 +50,9 @@ def predict_point(series_id: str, point: DataPoint):
 
 @app.get("/healthcheck")
 def healthcheck():
-    return get_inference_metrics()
+    metrics = get_inference_metrics()
+    system_metrics = get_system_metrics()
+    return {
+        **metrics,
+        "system": system_metrics
+    }

@@ -27,6 +27,3 @@ def save_model(model, series_id: str):
     filepath = os.path.join(MODEL_DIR, filename)
     joblib.dump(model, filepath)
     return version
-
-def cached_load_model(series_id: str):
-    return load_model(series_id)

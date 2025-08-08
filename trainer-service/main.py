@@ -3,7 +3,7 @@ sys.path.append('/app')
 
 from fastapi import FastAPI, HTTPException
 from common.model import AnomalyDetectionModel
-from common.persistence import save_model, load_model
+from common.persistence import save_model
 from common.timeseries import TimeSeries, DataPoint
 from common.metrics import (
     record_training_latency,

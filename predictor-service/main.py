@@ -3,7 +3,7 @@ sys.path.append('/app')
 
 from fastapi import FastAPI, HTTPException
 from common.model import AnomalyDetectionModel
-from common.persistence import cached_load_model
+from common.persistence import load_model
 from common.timeseries import TimeSeries, DataPoint
 from common.metrics import (
     record_inference_latency,
@@ -14,7 +14,6 @@ import time
 import json
 import os
 from kafka import KafkaProducer
-from functools import lru_cache
 from dotenv import load_dotenv
 
 app = FastAPI()
@@ -30,7 +29,7 @@ def predict_point(series_id: str, point: DataPoint):
     start = time.perf_counter()
 
     try:
-        model, version = cached_load_model(series_id)
+        model, version = load_model(series_id)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Model not found")
 

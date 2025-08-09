@@ -28,8 +28,10 @@ services:
       - ml-net
     restart: on-failure
     depends_on:
-      - kafka-1
-      - redis
+      kafka-1:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   predictor-service:
     build: ./predictor-service
@@ -46,8 +48,10 @@ services:
       - ml-net
     restart: on-failure
     depends_on:
-      - kafka-1
-      - redis
+      kafka-1:
+        condition: service_healthy
+      redis:
+        condition: service_started
       
   redis:
     image: redis:8.2-alpine
@@ -65,8 +69,10 @@ services:
     environment:
       - PYTHONPATH=/app
     depends_on:
-      - kafka-1
-      - redis
+      kafka-1:
+        condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./common:/app/common
     networks:
@@ -80,8 +86,10 @@ services:
     environment:
       - PYTHONPATH=/app
     depends_on:
-      - kafka-1
-      - redis
+      kafka-1:
+        condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./common:/app/common
     networks:
@@ -112,8 +120,10 @@ services:
     environment:
       - PYTHONPATH=/app
     depends_on:
-      - kafka-1
-      - postgres
+      kafka-1:
+        condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./common:/app/common
     networks:
@@ -122,6 +132,10 @@ services:
   
   kafka-1:
     image: bitnami/kafka:latest
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server kafka-1:9092 --list || exit 1"]
+      interval: 10s
+      retries: 10
     container_name: kafka-1
     environment:
       - KAFKA_KRAFT_CLUSTER_ID=cluster-1

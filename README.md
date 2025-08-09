@@ -23,7 +23,7 @@ It contains the following services:
 
 ![Architecture Diagram](static/diagram.jpg)
 
-## 🚀 Setup
+## Setup
 
 ### 1. Clone the repository
 ```
@@ -46,7 +46,7 @@ docker-compose build --no-cache
 docker-compose up
 ```
 
-## 🛠 Usage
+## Usage
 You can either run the demonstration script:
 ```
 sh demo.sh
@@ -166,4 +166,4 @@ The full report can be found at `static/results`
 
 - Training data is persisted in `PostgreSQL` for long-term storage.
 
-- The `old` folder contains the previously used FastAPI gateway and Dockerfile.
+- The `old` folder contains the previously used FastAPI gateway and Dockerfile. The gateway was changed from FastAPI (Python) to Gin (Go) due to performance reasons. While FastAPI's average response time was more than 200ms, Gin's average response time is below 5ms. The benchmark results for FastAPI can be found at `static/py_benchmark_100.jpg`

@@ -3,16 +3,12 @@ services:
     build: ./api-gateway
     container_name: api-gateway
     ports:
-      - "8000:8000"
+      - "8080:8080"
     env_file:
-    - .env
-    environment:
-      - PYTHONPATH=/app
+      - .env
     depends_on:
       - trainer-service
       - predictor-service
-    volumes:
-      - ./common:/app/common
     networks:
       - ml-net
     restart: on-failure

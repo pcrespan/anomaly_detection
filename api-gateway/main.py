@@ -1,7 +1,7 @@
 import sys
 sys.path.append('/app')
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query, Response
 from pydantic import BaseModel
 from common.timeseries import TimeSeries, DataPoint
 import httpx
@@ -65,3 +65,24 @@ async def gateway_healthcheck():
             "predictor": predictor_data.get("system", {})
         }
     }
+
+@app.get("/plot")
+async def plot(series_id: str = Query(...), version: str = Query(...)):
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(
+                f"{TRAINER_URL}/plot",
+                params={"series_id": series_id, "version": version}
+            )
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            try:
+                error_data = e.response.json()
+            except ValueError:
+                error_data = {"detail": e.response.text}
+
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail=error_data.get("detail", "Unknown error")
+            )
+    return Response(content=response.content, media_type="image/png", status_code=response.status_code)

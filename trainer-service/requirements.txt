@@ -2,6 +2,8 @@ fastapi[standard]
 redis
 kafka-python
 psutil
+psycopg2-binary
+matplotlib
 python-dotenv
 uvicorn
 joblib

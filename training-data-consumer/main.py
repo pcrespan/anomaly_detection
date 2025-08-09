@@ -3,17 +3,9 @@ import json
 import psycopg2
 from kafka import KafkaConsumer
 from dotenv import load_dotenv
+from common.db import get_db_connection, save_training_data
 
 load_dotenv()
-
-conn = psycopg2.connect(
-    dbname=os.getenv("POSTGRES_DB", "training_data"),
-    user=os.getenv("POSTGRES_USER", "user"),
-    password=os.getenv("POSTGRES_PASSWORD", "password"),
-    host=os.getenv("POSTGRES_HOST", "postgres"),
-    port=os.getenv("POSTGRES_PORT", "5432")
-)
-cur = conn.cursor()
 
 consumer = KafkaConsumer(
     "training-data",
@@ -31,10 +23,5 @@ for message in consumer:
     version = event["version"]
     data = event["data"]
 
-    for point in data:
-        cur.execute(
-            "INSERT INTO training_data (series_id, version, timestamp, value) VALUES (%s, %s, %s, %s)",
-            (series_id, version, point["timestamp"], point["value"])
-        )
-    conn.commit()
+    save_training_data(series_id, version, data)
     print(f"Saved training data for {series_id} ({version})")

@@ -1,22 +1,22 @@
 import sys
 sys.path.append('/app')
 
-from fastapi import FastAPI, HTTPException
+import json
+import time
+import os
+from fastapi import FastAPI, HTTPException, Query, Response
 from common.model import AnomalyDetectionModel
 from common.persistence import save_model
 from common.timeseries import TimeSeries, DataPoint
+from common.db import fetch_training_data
+from common.plot_utils import generate_training_plot
 from common.metrics import (
     record_training_latency,
-    record_inference_latency,
-    register_series,
     get_training_metrics
 )
 from common.system_metrics import get_system_metrics
 from kafka import KafkaProducer
 from dotenv import load_dotenv
-import json
-import time
-import os
 
 app = FastAPI()
 load_dotenv()
@@ -65,3 +65,22 @@ def healthcheck():
         **metrics,
         "system": system_metrics
     }
+
+@app.get("/plot")
+def plot_training_data(
+    series_id: str = Query(..., description="Series ID, e.g. sensor_01"),
+    version: str = Query(..., description="Model version, e.g. v3")
+):
+    rows = fetch_training_data(series_id, version)
+
+    if not rows:
+        raise HTTPException(
+            status_code=404,
+            detail="No training data found for given series_id and version."
+        )
+
+    timestamps = [row[0] for row in rows]
+    values = [row[1] for row in rows]
+
+    image_bytes = generate_training_plot(series_id, version, timestamps, values)
+    return Response(content=image_bytes, media_type="image/png")

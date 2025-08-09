@@ -2,7 +2,8 @@
 
 This project is a **scalable anomaly detection platform** built with:
 
-- **FastAPI** – API services
+- **Gin** - API Gateway
+- **FastAPI** – predictor, training and metrics services
 - **Kafka** – asynchronous event streaming
 - **Redis** – metrics storage
 - **PostgreSQL** – persistent training data storage
@@ -54,19 +55,16 @@ Or manually send requests to the API Gateway.
 
 ### 1. Train a model
 ```
-curl -X POST "http://localhost:8000/fit/sensor_01" \
+curl -X POST "http://localhost:8080/fit/sensor_01" \
   -H "Content-Type: application/json" \
   -d '{
-    "data": [
-      {"timestamp": 1693459200, "value": 10.0},
-      {"timestamp": 1693459260, "value": 10.5},
-      {"timestamp": 1693459320, "value": 11.0}
-    ]
+    "timestamps": [1693459200, 1693459260, 1693459320],
+    "values": [10.0, 10.5, 11.0]
   }'
 ```
 ### 2. Run a prediction
 ```
-curl -X POST "http://localhost:8000/predict/sensor_01" \
+curl -X POST "http://localhost:8080/predict/sensor_01" \
   -H "Content-Type: application/json" \
   -d '{
     "timestamp": 1693460000,
@@ -75,26 +73,63 @@ curl -X POST "http://localhost:8000/predict/sensor_01" \
 ```
 ### 3. Plot training data
 ```
-curl -X GET "http://localhost:8000/plot?series_id=sensor_01&version=v1" \
+curl -X GET "http://localhost:8080/plot?series_id=sensor_01&version=v1" \
   --output plot.png
 ```
 This will save the plot as `plot.png` in your current directory. Output example below.
 
-![Architecture Diagram](static/img.png)
+![Plot](static/img.png)
 
 ### 4. Healthcheck
 ```
-curl -X GET "http://localhost:8000/healthcheck"
+curl -X GET "http://localhost:8080/healthcheck"
 ```
 Example output:
 ```
 {
+  "inference_latency_ms": {
+    "avg": 0.35,
+    "p95": 0.6
+  },
+  "model_usage": {
+    "sensor_01": "391",
+    "sensor_02": "408",
+    "sensor_03": "380",
+    "sensor_04": "380",
+    "sensor_05": "374"
+  },
   "series_trained": 5,
-  "inference_latency_ms": {"avg": 0.82, "p95": 0},
-  "training_latency_ms": {"avg": 0.92, "p95": 0},
   "system_metrics": {
-    "trainer": {"cpu_percent": 1.3, "memory_percent": 43.8, "load_avg": [2.30, 2.08, 1.64]},
-    "predictor": {"cpu_percent": 0.6, "memory_percent": 43.8, "load_avg": [2.30, 2.08, 1.64]}
+    "predictor": {
+      "cpu_percent": 15.5,
+      "load_avg": [
+        1.9287109375,
+        1.376953125,
+        1.4716796875
+      ],
+      "memory_percent": 56.3
+    },
+    "trainer": {
+      "cpu_percent": 25.5,
+      "load_avg": [
+        1.9287109375,
+        1.376953125,
+        1.4716796875
+      ],
+      "memory_percent": 56.4
+    }
+  },
+  "throughput": {
+    "predictor": {
+      "avg_per_minute": 101.53
+    },
+    "trainer": {
+      "avg_per_minute": 1
+    }
+  },
+  "training_latency_ms": {
+    "avg": 0.77,
+    "p95": 0
   }
 }
 ```
@@ -108,7 +143,7 @@ pip install locust
 ### 2. Run Locust
 ```
 cd benchmark
-locust -f locustfile.py --host http://localhost:8000
+locust -f locustfile.py --host http://localhost:8080
 ```
 
 ### 3. Open the web UI
@@ -119,6 +154,10 @@ http://localhost:8089
 Configure number of users, ramp up and duration, then start the test.
 
 ## Benchmark results
+The full report can be found at `static/results`
+- 100 Users, 20 ramp up
+
+![Benchmark_1](static/go_benchmark_100.jpg)
 
 ## 🧩 Notes
 - The `/plot` endpoint is available through the `API Gateway` and generates plots from data stored in PostgreSQL.
@@ -126,3 +165,5 @@ Configure number of users, ramp up and duration, then start the test.
 - Metrics are stored in `Redis` for fast retrieval and are refreshed via `Kafka` events.
 
 - Training data is persisted in `PostgreSQL` for long-term storage.
+
+- The `old` folder contains the previously used FastAPI gateway and Dockerfile.

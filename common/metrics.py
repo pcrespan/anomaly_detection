@@ -2,6 +2,7 @@ import redis
 import statistics
 import json
 from typing import List
+from datetime import datetime, timedelta
 
 r = redis.Redis(host="redis", port=6379, decode_responses=True)
 
@@ -9,6 +10,8 @@ r = redis.Redis(host="redis", port=6379, decode_responses=True)
 KEY_TRAINING_TIMES = "metrics:training_times"
 KEY_INFERENCE_TIMES = "metrics:inference_times"
 KEY_SERIES_TRAINED = "metrics:series_trained"
+KEY_THROUGHPUT = "metrics:throughput"
+KEY_MODEL_USAGE = "metrics:model_usage"
 
 MAX_ENTRIES = 1000  # Max size
 
@@ -45,3 +48,35 @@ def get_inference_metrics():
         "series_trained": r.scard(KEY_SERIES_TRAINED),
         "inference_latency_ms": _get_latency_metrics(KEY_INFERENCE_TIMES)
     }
+
+def increment_throughput(endpoint: str):
+    now = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+    r.hincrby(f"{KEY_THROUGHPUT}:{endpoint}", now, 1)
+
+def get_throughput_metrics(endpoint: str):
+    now = datetime.utcnow()
+    one_minute_ago = now - timedelta(minutes=1)
+
+    raw_data = r.hgetall(f"{KEY_THROUGHPUT}:{endpoint}")
+
+    values = []
+    for ts_str, count in raw_data.items():
+        try:
+            ts = datetime.strptime(ts_str, "%Y-%m-%dT%H:%M:%S")
+            if ts >= one_minute_ago:
+                values.append(int(count))
+        except ValueError:
+            continue
+
+    if not values:
+        return {"avg_per_minute": 0}
+
+    avg_per_minute = sum(values) / len(values)
+    return {"avg_per_minute": round(avg_per_minute, 2)}
+
+def increment_model_usage(series_id: str):
+    r.hincrby(KEY_MODEL_USAGE, series_id, 1)
+
+# Model usage for predictor-service
+def get_model_usage():
+    return r.hgetall(KEY_MODEL_USAGE)

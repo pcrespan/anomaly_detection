@@ -12,7 +12,9 @@ from common.db import fetch_training_data
 from common.plot_utils import generate_training_plot
 from common.metrics import (
     record_training_latency,
-    get_training_metrics
+    get_training_metrics,
+    increment_throughput,
+    get_throughput_metrics
 )
 from common.system_metrics import get_system_metrics
 from kafka import KafkaProducer
@@ -51,6 +53,8 @@ def fit_model(series_id: str, series: TimeSeries):
         "data": [point.dict() for point in series.data]
     })
 
+    increment_throughput("fit")
+
     return {
         "series_id": series_id,
         "version": f"v{version}",
@@ -63,6 +67,7 @@ def healthcheck():
     system_metrics = get_system_metrics()
     return {
         **metrics,
+        "throughput": get_throughput_metrics("fit"),
         "system": system_metrics
     }
 

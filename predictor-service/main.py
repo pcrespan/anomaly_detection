@@ -7,7 +7,11 @@ from common.persistence import load_model
 from common.timeseries import TimeSeries, DataPoint
 from common.metrics import (
     record_inference_latency,
-    get_inference_metrics
+    get_inference_metrics,
+    get_throughput_metrics,
+    increment_throughput,
+    increment_model_usage,
+    get_model_usage
 )
 from common.system_metrics import get_system_metrics
 import time
@@ -41,6 +45,9 @@ def predict_point(series_id: str, point: DataPoint):
         "latency_ms": elapsed
     })
 
+    increment_throughput("predict")
+    increment_model_usage(series_id)
+
     return {
         "series_id": series_id,
         "version": f"v{version}",
@@ -53,5 +60,7 @@ def healthcheck():
     system_metrics = get_system_metrics()
     return {
         **metrics,
+        "throughput": get_throughput_metrics("predict"),
+        "model_usage": get_model_usage(),
         "system": system_metrics
     }

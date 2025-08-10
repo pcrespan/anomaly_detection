@@ -121,11 +121,11 @@ func predictHandler(c *gin.Context) {
 
 	var point DataPoint
 	if err := c.ShouldBindJSON(&point); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"detail": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"detail": "Invalid request payload"})
 		return
 	}
 	if err := validate.Struct(point); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"detail": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"detail": "Invalid request payload"})
 		return
 	}
 

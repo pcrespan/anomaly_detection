@@ -38,7 +38,7 @@ def _get_latency_metrics(key: str) -> dict:
         return {"avg": 0, "p95": 0}
     
     avg = round(statistics.mean(values), 2)
-    p95 = round(statistics.quantiles(values, n=100)[94], 2) if len(values) >= 20 else 0
+    p95 = round(statistics.quantiles(values, n=100)[94], 2) if len(values) >= 5 else 0
     return {"avg": avg, "p95": p95}
 
 def get_training_metrics():

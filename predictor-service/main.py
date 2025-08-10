@@ -48,9 +48,8 @@ def predict_point(series_id: str, point: DataPoint):
     increment_model_usage(series_id)
 
     return {
-        "series_id": series_id,
-        "version": f"v{version}",
-        "is_anomaly": is_anomaly
+        "model_version": f"v{version}",
+        "anomaly": is_anomaly
     }
 
 @app.get("/healthcheck")

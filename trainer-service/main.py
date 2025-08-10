@@ -11,7 +11,6 @@ from common.timeseries import TimeSeries, DataPoint
 from common.db import fetch_training_data
 from common.plot_utils import generate_training_plot
 from common.metrics import (
-    record_training_latency,
     get_training_metrics,
     increment_throughput,
     get_throughput_metrics

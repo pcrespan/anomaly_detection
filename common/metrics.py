@@ -1,10 +1,14 @@
 import redis
 import statistics
 import json
+import os
 from typing import List
 from datetime import datetime, timedelta
 
-r = redis.Redis(host="redis", port=6379, decode_responses=True)
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+REDIS_PORT = os.getenv("REDIS_PORT", 6379)
+
+r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
 # Redis
 KEY_TRAINING_TIMES = "metrics:training_times"
@@ -13,7 +17,7 @@ KEY_SERIES_TRAINED = "metrics:series_trained"
 KEY_THROUGHPUT = "metrics:throughput"
 KEY_MODEL_USAGE = "metrics:model_usage"
 
-MAX_ENTRIES = 1000  # Max size
+MAX_ENTRIES = 6000  # 1 min history
 
 def record_training_latency(ms: float):
     r.lpush(KEY_TRAINING_TIMES, ms)

@@ -1,6 +1,5 @@
 import os
 import json
-import psycopg2
 from kafka import KafkaConsumer
 from dotenv import load_dotenv
 from common.db import get_db_connection, save_training_data

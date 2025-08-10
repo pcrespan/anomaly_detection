@@ -11,6 +11,8 @@ function pause() {
 }
 
 BASE_URL="http://localhost:8080"
+EXAMPLE_DIR="./static/example"
+mkdir -p "$EXAMPLE_DIR"
 
 echo -e "${BLUE}Starting training tests...${NC}"
 
@@ -53,6 +55,16 @@ curl -s -X POST ${BASE_URL}/fit/sensor_07 \
 echo -e "\n"
 pause
 
+echo -e "${BLUE}Retraining sensor_01 to check version increment...${NC}"
+curl -s -X POST ${BASE_URL}/fit/sensor_01 \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"timestamps\": [1693460400, 1693460460, 1693460520],
+    \"values\": [12.0, 12.5, 13.0]
+  }"
+echo -e "\n"
+pause
+
 echo -e "${BLUE}Starting prediction tests...${NC}"
 
 echo -e "${GREEN}Predicting with normal value for sensor_01${NC}"
@@ -81,6 +93,14 @@ curl -s -X POST ${BASE_URL}/predict/sensor_999 \
   -H "Content-Type: application/json" \
   -d '{"timestamp": 1693461000, "value": 10.5}'
 echo -e "\n"
+pause
+
+echo -e "${BLUE}Fetching plot for sensor_01 version 2...${NC}"
+curl -s -G "${BASE_URL}/plot" \
+  --data-urlencode "series_id=sensor_01" \
+  --data-urlencode "version=v2" \
+  --output "${EXAMPLE_DIR}/sensor_01_v2.png"
+echo -e "${GREEN}Plot saved to ${EXAMPLE_DIR}/sensor_01_v2.png${NC}"
 pause
 
 echo -e "${BLUE}Checking healthcheck endpoint...${NC}"

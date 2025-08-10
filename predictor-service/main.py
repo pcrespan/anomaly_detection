@@ -6,7 +6,6 @@ from common.model import AnomalyDetectionModel
 from common.persistence import load_model
 from common.timeseries import TimeSeries, DataPoint
 from common.metrics import (
-    record_inference_latency,
     get_inference_metrics,
     get_throughput_metrics,
     increment_throughput,

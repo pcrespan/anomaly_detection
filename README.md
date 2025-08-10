@@ -13,7 +13,7 @@ It contains the following services:
 
 1. **API Gateway** – single entry point for training, prediction, plotting, and metrics. (1 instance)
 2. **Trainer Service** – trains models for time series anomaly detection. (4 workers)
-3. **Predictor Service** – performs predictions using trained models. (5 workers)
+3. **Predictor Service** – performs predictions using trained models. (10 workers)
 4. **Metrics Consumer** – consumes Kafka metrics events and updates Redis. (2 partitions)
 5. **Training Data Consumer** – consumes Kafka training data events and stores them in PostgreSQL. (1 partition)
 6. **Redis** – stores metrics in-memory for quick access. (1 instance)

@@ -34,7 +34,7 @@ It contains the following services:
 ### 1. Clone the repository
 ```
 git clone https://github.com/pcrespan/anomaly_detection.git
-cd anomaly_dectection
+cd anomaly_detection
 ```
 
 ### 2. Create your env file

@@ -11,17 +11,23 @@ This project is a **scalable anomaly detection platform** built with:
 
 It contains the following services:
 
-1. **API Gateway** – single entry point for training, prediction, plotting, and metrics.
-2. **Trainer Service** – trains models for time series anomaly detection.
-3. **Predictor Service** – performs predictions using trained models.
-4. **Metrics Consumer** – consumes Kafka metrics events and updates Redis.
-5. **Training Data Consumer** – consumes Kafka training data events and stores them in PostgreSQL.
-6. **Redis** – stores metrics in-memory for quick access.
-7. **Kafka Cluster** – processes asynchronous messages.
+1. **API Gateway** – single entry point for training, prediction, plotting, and metrics. (1 instance)
+2. **Trainer Service** – trains models for time series anomaly detection. (4 workers)
+3. **Predictor Service** – performs predictions using trained models. (5 workers)
+4. **Metrics Consumer** – consumes Kafka metrics events and updates Redis. (2 partitions)
+5. **Training Data Consumer** – consumes Kafka training data events and stores them in PostgreSQL. (1 partition)
+6. **Redis** – stores metrics in-memory for quick access. (1 instance)
+7. **Kafka Cluster** – processes asynchronous messages. (2 instances)
 
 ## 📌 Architecture
 
 ![Architecture Diagram](static/diagram.jpg)
+
+## Implemented Enhancements
+- **Performance Testing:** Included Locust benchmark results
+- **Preflight Validation:** Validation for insufficient, constant or invalid data
+- **Visualization Tool:** Endpoint that plots training data
+- **Model Versioning:** Implemented retraining of the same `series_id`
 
 ## Setup
 

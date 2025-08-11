@@ -16,8 +16,8 @@ services:
   trainer-service:
     build: ./trainer-service
     container_name: trainer-service
-    ports:
-      - "9001:9000"
+    expose:
+      - "9000"
     env_file:
     - .env
     environment:
@@ -36,8 +36,8 @@ services:
   predictor-service:
     build: ./predictor-service
     container_name: predictor-service
-    ports:
-      - "9002:9000"
+    expose:
+      - "9000"
     env_file:
     - .env
     environment:
